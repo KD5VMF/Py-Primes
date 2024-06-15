@@ -16,8 +16,8 @@ def find_twin_primes(start, end):
 def save_twin_primes(twin_primes, filename):
     with open(filename, 'a') as f:
         for twin in twin_primes:
-            f.write(f"{twin[0]}, {twin[1]}\n")
-            logging.info(f"Saved twin prime: {twin[0]}, {twin[1]}")
+            f.write(f"{twin[0]:,}, {twin[1]:,}\n")
+            logging.info(f"Saved twin prime: {twin[0]:,}, {twin[1]:,}")
 
 def read_last_twin_prime(filename):
     if not os.path.exists(filename):
@@ -28,31 +28,40 @@ def read_last_twin_prime(filename):
             return 1  # Start from the beginning if the file is empty
         last_line = lines[-1]
         last_twin = last_line.strip().split(", ")
-        return int(last_twin[1]) + 1
+        return int(last_twin[1].replace(',', '')) + 1
 
 filename = "twin_primes.txt"
+buffer = []
 
 try:
     start = read_last_twin_prime(filename)
+    iteration_count = 0
     while True:
         end = start + 1000  # Adjust the range as needed
 
-        logging.info(f"Starting twin primes search from {start} to {end}")
+        logging.info(f"Starting twin primes search from {start:,} to {end:,}")
 
         twin_primes = find_twin_primes(start, end)
-        save_twin_primes(twin_primes, filename)
+        buffer.extend(twin_primes)
 
-        logging.info(f"Completed twin primes search from {start} to {end}")
+        logging.info(f"Completed twin primes search from {start:,} to {end:,}")
 
         # Update start for next iteration
         start = end + 1
 
         # Print the found twin primes
         for twin in twin_primes:
-            print(f"{twin[0]}, {twin[1]}")
+            print(f"{twin[0]:,}, {twin[1]:,}")
+
+        iteration_count += 1
+
+        # Save the buffer to file every 1000 iterations
+        if iteration_count % 1000 == 0:
+            save_twin_primes(buffer, filename)
+            buffer = []  # Clear the buffer
 
         # Sleep for a bit to avoid overwhelming the system
-        time.sleep(1)
+        #time.sleep(1)
 
 except Exception as e:
     logging.error(f"An error occurred: {e}")
